@@ -5,6 +5,7 @@ const initialState = {
   email: "",
   password: "",
   confirmPassword: "",
+  avatar: "",
 }
 export const UserSlice = createSlice({
   name: "user",
@@ -15,6 +16,7 @@ export const UserSlice = createSlice({
       state.email = payload.email;
       state.password = payload.password;
       state.confirmPassword = payload.cpassword;
+      state.avatar = payload.fieldValue;
       return state
     }
   }

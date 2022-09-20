@@ -3,14 +3,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from '../../features/UserSlice';
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useRouter } from 'next/router'
+import styles from './style.module.css'
 
 
 const register = () => {
-  const [successful, setSuccessful] = useState(false);
-  const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
+  const [fieldValue, setFieldValue] = useState({});
 
-  const {name} = useSelector((state)=> state.user);
-  console.log(name);
+  const dispatch = useDispatch();
+  const router = useRouter()
+
+  const userData = useSelector((state)=> state.user);
+
+  if(userData.email !== ""){
+    router.push('/profile');
+  }
 
   const initialValues = {
     username: "",
@@ -55,80 +63,98 @@ const register = () => {
     .required("This field is required!"),
   });
 
-  const handleRegister = (formValue) => {
+  const handleRegister = (formValue, values) => {
     const { username, email, password, cpassword } = formValue;
 
-    setSuccessful(false);
+    if(password !== cpassword){
+      alert('Password does not match')
+    }
+    else{
+      dispatch(registerUser({ username, email, password, cpassword, fieldValue}));f
+    }
 
-    dispatch(registerUser({ username, email, password, cpassword }));
-      
+    
   };
 
   return (
-    <div>
+    <div className={styles.mainContainer}>
+      <div className={styles.subContainer}>
+        <div className={styles.header}>
+          <h1>Register</h1>
+        </div>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleRegister}
         >
           <Form>
-            {!successful && (
               <div>
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="username">Username</label>
-                  <Field name="username" type="text" className="form-control" />
+                  <Field name="username" type="text" className={styles.formInput} />
                   <ErrorMessage
                     name="username"
                     component="div"
-                    className="alert alert-danger"
+                    className={styles.formError}
                   />
                 </div>
 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="email">Email</label>
-                  <Field name="email" type="email" className="form-control" />
+                  <Field name="email" type="email" className={styles.formInput} />
                   <ErrorMessage
                     name="email"
                     component="div"
-                    className="alert alert-danger"
+                    className={styles.formError}
                   />
                 </div>
 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="password">Password</label>
                   <Field
                     name="password"
-                    type="password"
-                    className="form-control"
+                    type={showPassword ? 'text' : 'password'}
+                    className={styles.formInput}
                   />
                   <ErrorMessage
                     name="password"
                     component="div"
-                    className="alert alert-danger"
+                    className={styles.formError}
                   />
                 </div>
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label htmlFor="cpassword">Confirm Password</label>
                   <Field
                     name="cpassword"
-                    type="password"
-                    className="form-control"
+                    type={showPassword ? 'text' : 'password'}
+                    className={styles.formInput}
                   />
                   <ErrorMessage
                     name="cpassword"
                     component="div"
-                    className="alert alert-danger"
+                    className={styles.formError}
                   />
                 </div>
-
-                <div className="form-group">
-                  <button type="submit">Sign Up</button>
+                <input id="file" name="file" type="file" className={styles.avatarInput} onChange={(e) => {
+                  const fileReader = new FileReader();
+                  fileReader.onload = () => {
+                    if (fileReader.readyState === 2) {
+                      setFieldValue(fileReader.result);
+                    }
+                  };
+                  fileReader.readAsDataURL(e.target.files[0]);
+                }}/>
+                <div className={styles.formGroup}>
+                  <button type="button" className={styles.button} onClick={()=>setShowPassword(!showPassword)}>{showPassword ? 'Hide' : 'Show'} password</button>
+                </div>
+                <div className={styles.formGroup}>
+                  <button type="submit" className={styles.button}>Sign Up</button>
                 </div>
               </div>
-            )}
           </Form>
         </Formik>
       </div>
+    </div>
   );
 }
 
